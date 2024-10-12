@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BooksController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -13,6 +14,9 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+Route::get('/books', [BooksController::class, 'lists'])->name('lists');
+Route::get('/books/{list}', [BooksController::class, 'list'])->name('list');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
