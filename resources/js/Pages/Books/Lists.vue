@@ -6,6 +6,9 @@ const props = defineProps({
     slug: {
         type: String,
     },
+    overview: {
+        type: Array,
+    }
 });
 
 const error = ref('')
@@ -16,8 +19,8 @@ const list = ref([])
 const listLoaded = ref(false)
 
 onMounted(async () => {
+    console.log(props.overview)
     try {
-
         if (props.slug) {
             const listResponse = await fetch(`/api/books/lists/${props.slug}`)
             if (!listResponse.ok) {
@@ -70,7 +73,7 @@ const filteredList = computed(() => {
         <h2 class="text-lg font-extrabold mb-8" v-if="list.name" v-text="list.name"></h2>
         <input type="text" v-model="searchTerm" :placeholder="placeholder" :disabled="!listsLoaded" class="w-full mb-4">
         <div v-if="error" v-text="error" class="text-red-800 bg-red-100 -mt-3 mb-4 px-4 py-2 rounded-md"></div>
-        <div v-if="filteredList" class="mb-8">
+        <div v-if="filteredList.length" class="mb-8">
             <ul class="flex flex-wrap">
                 <li v-for="listObj in filteredList">
                     <Link :href="route('list', { list: listObj.slug })"
@@ -79,10 +82,25 @@ const filteredList = computed(() => {
                     </Link>
                 </li>
             </ul>
+            <div v-if="searchTerm.length && filteredList.length <= 0">
+                No best sellers lists found with your search term: <span v-text="searchTerm" class="italic"></span>
+            </div>
         </div>
-        <div v-if="searchTerm.length && filteredList.length <= 0">
-            No best sellers lists found with your search term: <span v-text="searchTerm" class="italic"></span>
+        <div v-else class="mb-8 divide-y">
+            <div v-for="listObj in overview" class="py-8">
+                <Link :href="route('list', { list: listObj.slug })"
+                    class="inline-block mb-8 text-lg hover:underline"
+                    v-text="listObj.name">
+                </Link>
+                <div class="columns-5 gap-12">
+                    <div v-for="bookObj in listObj.books">
+                        <a v-bind:href="bookObj.url" target="_blank"><img v-bind:src="bookObj.book_image" class="max-w-full"></a>
+                    </div>
+                </div>
+            </div>
         </div>
+        
+        
         <div v-if="list.books">
             <ul class="divide-y">
                 <li v-for="bookObj in list.books" class="flex gap-4 p-4 items-center">
